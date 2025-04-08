@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -40,9 +41,16 @@ fun ChatsScreen(
     val user = loginViewModel.userData.collectAsState()
     val chatList = chatViewModel.chatList.collectAsState()
 
-    LaunchedEffect(user.value) {
+    LaunchedEffect(user.value?.id_usuario) {
         user.value?.let {
             chatViewModel.getChatsByPaciente(id = it.id_usuario)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        chatViewModel.observeMessages()
+        onDispose {
+            chatViewModel.removeMessageListener()
         }
     }
 
@@ -109,7 +117,7 @@ fun ChatsScreen(
                             title = chat.nomeEnfermeiro,
                             date = ISOToDateAdapter(chat.createdAt),
                             lastMessage = chat.ultimaMensagem,
-                            quantity = 1
+                            quantity = chat.quantidade
                         )
                     }
                 }

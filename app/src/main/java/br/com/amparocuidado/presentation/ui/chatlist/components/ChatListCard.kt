@@ -1,5 +1,6 @@
 package br.com.amparocuidado.presentation.ui.chatlist.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,10 +16,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.MessageSquareMore
@@ -32,6 +36,8 @@ fun ChatListCard(
     lastMessage: String,
     quantity: Int
 ) {
+    val hasQuantity = quantity > 0
+
     Card(
         modifier = modifier,
         colors = CardColors(
@@ -54,23 +60,39 @@ fun ChatListCard(
                 modifier = Modifier
                     .size(48.dp),
                 colors = CardColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = if (hasQuantity == true) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.surface,
                     disabledContainerColor = MaterialTheme.colorScheme.secondary,
                     disabledContentColor = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(percent = 100),
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Lucide.MessageSquareMore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.surface,
-                    )
+                if (hasQuantity == true) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = quantity.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.surface,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                        )
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Lucide.MessageSquareMore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.surface,
+                        )
+                    }
                 }
             }
 
