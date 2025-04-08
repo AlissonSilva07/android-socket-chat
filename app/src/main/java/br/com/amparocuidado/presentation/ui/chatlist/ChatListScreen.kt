@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,8 +28,6 @@ import br.com.amparocuidado.presentation.components.ButtonVariant
 import br.com.amparocuidado.presentation.components.CustomButton
 import br.com.amparocuidado.presentation.ui.chatlist.components.ChatListCard
 import br.com.amparocuidado.presentation.ui.login.LoginViewModel
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Lucide
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,13 +53,6 @@ fun ChatsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                navigationIcon = {
-                    Icon(
-                        imageVector = Lucide.ArrowLeft,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
                 title = {
                     Row(
                         modifier = Modifier
@@ -77,13 +67,6 @@ fun ChatsScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                },
-                actions = {
-                    Icon(
-                        imageVector = Lucide.ArrowLeft,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.surface
-                    )
                 }
             )
         }
@@ -123,7 +106,7 @@ fun ChatsScreen(
                         ChatListCard(
                             onNavigateToChat = onNavigateToChat,
                             modifier = Modifier.fillMaxWidth(),
-                            title = "Conversa",
+                            title = chat.nomeEnfermeiro,
                             date = ISOToDateAdapter(chat.createdAt),
                             lastMessage = chat.ultimaMensagem,
                             quantity = 1
