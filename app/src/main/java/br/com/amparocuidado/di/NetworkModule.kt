@@ -1,6 +1,8 @@
 package br.com.amparocuidado.di
 
 import br.com.amparocuidado.data.remote.api.AuthApi
+import br.com.amparocuidado.data.remote.api.ChatApi
+import br.com.amparocuidado.data.remote.api.UserApi
 import br.com.amparocuidado.data.utils.AuthInterceptor
 import br.com.amparocuidado.data.utils.RemoteConstants.BASE_URL
 import dagger.Module
@@ -40,4 +42,12 @@ class NetworkModule {
     @Provides
     @Singleton
     fun providesAuthAPI(retrofit: Retrofit): AuthApi = retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesUserAPI(retrofit: Retrofit): UserApi = retrofit.create(UserApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesChatAPI(retrofit: Retrofit): ChatApi = retrofit.create(ChatApi::class.java)
 }

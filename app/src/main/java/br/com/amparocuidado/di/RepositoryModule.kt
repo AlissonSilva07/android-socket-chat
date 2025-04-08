@@ -1,9 +1,16 @@
 package br.com.amparocuidado.di
 
 import br.com.amparocuidado.data.remote.api.AuthApi
+import br.com.amparocuidado.data.remote.api.ChatApi
+import br.com.amparocuidado.data.remote.api.UserApi
 import br.com.amparocuidado.data.repository.AuthRepositoryImpl
+import br.com.amparocuidado.data.repository.ChatRepositoryImpl
+import br.com.amparocuidado.data.repository.UserRepositoryImpl
 import br.com.amparocuidado.data.utils.TokenManager
+import br.com.amparocuidado.data.utils.UserManager
 import br.com.amparocuidado.domain.repository.AuthRepository
+import br.com.amparocuidado.domain.repository.ChatRepository
+import br.com.amparocuidado.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,4 +27,17 @@ class RepositoryModule {
         authApi: AuthApi,
         tokenManager: TokenManager
     ): AuthRepository = AuthRepositoryImpl(authApi, tokenManager)
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        userApi: UserApi,
+        userManager: UserManager
+    ): UserRepository = UserRepositoryImpl(userApi, userManager)
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(
+        chatApi: ChatApi
+    ): ChatRepository = ChatRepositoryImpl(chatApi)
 }

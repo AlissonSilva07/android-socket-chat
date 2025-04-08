@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.toArgb
+import br.com.amparocuidado.domain.model.User
 import br.com.amparocuidado.presentation.navigation.AppNavigation
 import br.com.amparocuidado.presentation.ui.theme.AmparoCuidadoTheme
 import br.com.amparocuidado.presentation.ui.theme.white

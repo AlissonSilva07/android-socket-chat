@@ -2,8 +2,8 @@ package br.com.amparocuidado.data.repository
 
 import android.util.Log
 import br.com.amparocuidado.data.remote.api.AuthApi
-import br.com.amparocuidado.data.remote.dto.LoginRequest
-import br.com.amparocuidado.data.remote.dto.LoginResponse
+import br.com.amparocuidado.data.remote.dto.login.LoginRequest
+import br.com.amparocuidado.data.remote.dto.login.LoginResponse
 import br.com.amparocuidado.data.utils.Resource
 import br.com.amparocuidado.data.utils.TokenManager
 import br.com.amparocuidado.domain.repository.AuthRepository
@@ -19,9 +19,9 @@ class AuthRepositoryImpl @Inject constructor (
         return try {
             val response = authApi.login(request)
             if (response.isSuccessful && response.body() != null) {
-                val userResponse = response.body()!!
-                tokenManager.updateAuthToken(userResponse.accessToken)
-                Resource.Success(userResponse)
+                val loginResponse = response.body()!!
+                tokenManager.updateAuthToken(loginResponse.accessToken)
+                Resource.Success(loginResponse)
             } else if (response.errorBody() != null) {
                 val errorMessage = response.errorBody()!!.charStream().readText()
                 Log.e("API_RESPONSE", errorMessage)
@@ -33,5 +33,6 @@ class AuthRepositoryImpl @Inject constructor (
             Resource.Error(e.message ?: "An error occurred")
         }
     }
+
 
 }

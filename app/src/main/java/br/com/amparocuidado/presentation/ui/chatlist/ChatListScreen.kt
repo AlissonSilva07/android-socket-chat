@@ -1,42 +1,54 @@
 package br.com.amparocuidado.presentation.ui.chatlist
 
+import ISOToDateAdapter
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.amparocuidado.presentation.components.ButtonVariant
 import br.com.amparocuidado.presentation.components.CustomButton
 import br.com.amparocuidado.presentation.ui.chatlist.components.ChatListCard
-import br.com.amparocuidado.presentation.ui.theme.AmparoCuidadoTheme
+import br.com.amparocuidado.presentation.ui.login.LoginViewModel
 import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.MessageSquareMore
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreen(
-    onNavigateToChat: () -> Unit = {}
+    onNavigateToChat: () -> Unit = {},
+    chatViewModel: ChatListViewModel = hiltViewModel(),
+    loginViewModel: LoginViewModel = hiltViewModel()
 ) {
+    val user = loginViewModel.userData.collectAsState()
+    val chatList = chatViewModel.chatList.collectAsState()
+
+    LaunchedEffect(user.value) {
+        user.value?.let {
+            chatViewModel.getChatsByPaciente(id = it.id_usuario)
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
@@ -59,7 +71,7 @@ fun ChatsScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Chats",
+                            text = "Chats de ${user.value?.nm_pessoa_fisica}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold
@@ -100,27 +112,32 @@ fun ChatsScreen(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
-
-            ChatListCard(
-                onNavigateToChat = onNavigateToChat,
-                modifier = Modifier.fillMaxWidth(),
-                title = "Conversa",
-                date = "DD/MM/YYYY",
-                lastMessage = "Mensagem",
-                quantity = 1
-            )
+            if (chatList.value != null) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(chatList.value ?: emptyList()) { chat ->
+                        ChatListCard(
+                            onNavigateToChat = onNavigateToChat,
+                            modifier = Modifier.fillMaxWidth(),
+                            title = "Conversa",
+                            date = ISOToDateAdapter(chat.createdAt),
+                            lastMessage = chat.ultimaMensagem,
+                            quantity = 1
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "Nenhuma conversa encontrada.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
 
         }
-    }
-}
-
-@Preview
-@Composable
-private fun ChatsScreenPreview() {
-    AmparoCuidadoTheme(
-        darkTheme = false,
-        dynamicColor = false
-    ) {
-        ChatsScreen()
     }
 }

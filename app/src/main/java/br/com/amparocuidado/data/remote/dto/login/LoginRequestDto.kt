@@ -1,4 +1,4 @@
-package br.com.amparocuidado.data.remote.dto
+package br.com.amparocuidado.data.remote.dto.login
 
 data class LoginRequest(
     val usuario: String,

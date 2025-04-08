@@ -48,7 +48,7 @@ fun ChatScreen() {
     val messages = remember { mutableListOf<Message>(
         Message(
             idMensagem = 1,
-            mensage = "Olá, enfermeira. Estou com uma dor muito forte no meu abdômen.",
+            mensagem = "Olá, enfermeira. Estou com uma dor muito forte no meu abdômen.",
             idChat = 22,
             createdBy = 10,
             createdAt = "2025-04-07",
@@ -56,7 +56,7 @@ fun ChatScreen() {
         ),
         Message(
             idMensagem = 2,
-            mensage = "Olá! Sinto muito por você estar sentindo dor. Pode me dizer há quanto tempo você está assim e se a dor é constante ou vem e vai?",
+            mensagem = "Olá! Sinto muito por você estar sentindo dor. Pode me dizer há quanto tempo você está assim e se a dor é constante ou vem e vai?",
             idChat = 22,
             createdBy = 17,
             createdAt = "2025-04-07",
@@ -64,7 +64,7 @@ fun ChatScreen() {
         ),
         Message(
             idMensagem = 3,
-            mensage = "Começou há umas três horas. A dor é constante e parece estar aumentando.",
+            mensagem = "Começou há umas três horas. A dor é constante e parece estar aumentando.",
             idChat = 22,
             createdBy = 10,
             createdAt = "2025-04-07",

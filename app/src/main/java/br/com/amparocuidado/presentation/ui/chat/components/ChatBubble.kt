@@ -55,7 +55,7 @@ fun ChatBubble(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = message.mensage,
+                        text = message.mensagem,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.surface,
                         fontWeight = FontWeight.Normal
@@ -113,7 +113,7 @@ fun ChatBubble(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = message.mensage,
+                        text = message.mensagem,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Normal
@@ -137,7 +137,7 @@ private fun ChatBubbleNotMePreview() {
             ChatBubble(
                 message = Message(
                     idMensagem = 1,
-                    mensage = "Oi, tudo bem?",
+                    mensagem = "Oi, tudo bem?",
                     idChat = 22,
                     createdBy = 17,
                     createdAt = "2025-04-07",
@@ -149,7 +149,7 @@ private fun ChatBubbleNotMePreview() {
             ChatBubble(
                 message = Message(
                     idMensagem = 1,
-                    mensage = "Oi, Tudo sim.",
+                    mensagem = "Oi, Tudo sim.",
                     idChat = 22,
                     createdBy = 10,
                     createdAt = "2025-04-07",
