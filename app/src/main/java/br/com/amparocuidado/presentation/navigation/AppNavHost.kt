@@ -1,19 +1,24 @@
 package br.com.amparocuidado.presentation.navigation
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import br.com.amparocuidado.presentation.ui.chat.ChatScreen
 import br.com.amparocuidado.presentation.ui.chatlist.ChatsScreen
 import br.com.amparocuidado.presentation.ui.login.LoginScreen
 import br.com.amparocuidado.presentation.ui.login.LoginViewModel
 import br.com.amparocuidado.presentation.ui.welcome.WelcomeScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     loginViewModel: LoginViewModel = hiltViewModel(),
@@ -24,7 +29,7 @@ fun AppNavigation(
     val startDestination = if (authToken.value == null) {
         Screen.Welcome.route
     } else {
-        Screen.ChatList.route
+        Screen.ChatRoutes.Chats
     }
 
     NavHost(
@@ -42,23 +47,29 @@ fun AppNavigation(
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToChats = {
-                    navController.navigate(Screen.ChatList.route) {
+                    navController.navigate(Screen.ChatRoutes.Chats) {
                         popUpTo(0)
                     }
                 }
             )
         }
 
-        composable(Screen.ChatList.route) {
+        composable(Screen.ChatRoutes.Chats) {
             ChatsScreen(
-                onNavigateToChat = {
-                    navController.navigate(Screen.Chat.route)
+                onNavigateToChat = { idChat ->
+                    navController.navigate(Screen.ChatRoutes.getChatDetailRoute(idChat))
                 }
             )
         }
 
-        composable(Screen.Chat.route) {
-            ChatScreen()
+        composable(
+            route = Screen.ChatRoutes.ChatDetail,
+            arguments = listOf(navArgument("idChat") { type = NavType.StringType })
+        ) {
+            val idChat = it.arguments?.getString("idChat")
+            ChatScreen(
+                idChat = idChat ?: ""
+            )
         }
     }
 }

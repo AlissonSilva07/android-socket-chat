@@ -60,7 +60,7 @@ class ChatListViewModel @Inject constructor(
         }
     }
 
-    fun joinAllChats(chats: List<Chat>, userId: Int) {
+    private fun joinAllChats(chats: List<Chat>, userId: Int) {
         for (chat in chats) {
             val params = JSONObject().apply {
                 put("id_chat", chat.id)

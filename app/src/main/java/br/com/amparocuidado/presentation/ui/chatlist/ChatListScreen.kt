@@ -2,7 +2,6 @@ package br.com.amparocuidado.presentation.ui.chatlist
 
 import ISOToDateAdapter
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +36,7 @@ import br.com.amparocuidado.presentation.ui.login.LoginViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreen(
-    onNavigateToChat: () -> Unit = {},
+    onNavigateToChat: (String) -> Unit,
     chatViewModel: ChatListViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -50,7 +49,6 @@ fun ChatsScreen(
     }
 
     val chatList by chatViewModel.chatList.collectAsState()
-
 
     DisposableEffect(Unit) {
         chatViewModel.observeMessages()
@@ -117,7 +115,9 @@ fun ChatsScreen(
                 ) {
                     items(chatList as List<Chat>) { chat ->
                         ChatListCard(
-                            onNavigateToChat = onNavigateToChat,
+                            onNavigateToChat = {
+                                onNavigateToChat(chat.id.toString())
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             title = chat.nomeEnfermeiro,
                             date = ISOToDateAdapter(chat.createdAt),

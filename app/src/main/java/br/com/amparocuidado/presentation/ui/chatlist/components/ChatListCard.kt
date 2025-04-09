@@ -1,6 +1,5 @@
 package br.com.amparocuidado.presentation.ui.chatlist.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,13 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.MessageSquareMore
@@ -30,7 +26,7 @@ import com.composables.icons.lucide.MessageSquareMore
 @Composable
 fun ChatListCard(
     modifier: Modifier = Modifier,
-    onNavigateToChat: () -> Unit = {},
+    onNavigateToChat: () -> Unit,
     title: String,
     date: String,
     lastMessage: String,
@@ -122,7 +118,9 @@ fun ChatListCard(
                     text = lastMessage,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

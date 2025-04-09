@@ -19,10 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.amparocuidado.domain.model.Message
-import br.com.amparocuidado.presentation.ui.theme.AmparoCuidadoTheme
 
 @Composable
 fun ChatBubble(
@@ -55,7 +53,7 @@ fun ChatBubble(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = message.mensagem,
+                        text = message.mensagem ?: "Mensagem",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.surface,
                         fontWeight = FontWeight.Normal
@@ -86,7 +84,7 @@ fun ChatBubble(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = message.nome.take(1),
+                        text = message.nome?.take(1) ?: "",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.surface,
                         fontWeight = FontWeight.Normal
@@ -103,7 +101,7 @@ fun ChatBubble(
                     disabledContentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
                 border = BorderStroke(color = MaterialTheme.colorScheme.outline, width = 1.dp)
             ) {
                 Column(
@@ -113,51 +111,13 @@ fun ChatBubble(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = message.mensagem,
+                        text = message.mensagem ?: "Mensagem",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Normal
                     )
                 }
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ChatBubbleNotMePreview() {
-    AmparoCuidadoTheme(
-        darkTheme = false,
-        dynamicColor = false
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            ChatBubble(
-                message = Message(
-                    idMensagem = 1,
-                    mensagem = "Oi, tudo bem?",
-                    idChat = 22,
-                    createdBy = 17,
-                    createdAt = "2025-04-07",
-                    nome = "Enfermeiro"
-                ),
-                author = 10
-            )
-
-            ChatBubble(
-                message = Message(
-                    idMensagem = 1,
-                    mensagem = "Oi, Tudo sim.",
-                    idChat = 22,
-                    createdBy = 10,
-                    createdAt = "2025-04-07",
-                    nome = "Alisson"
-                ),
-                author = 10
-            )
-
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +24,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,8 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.amparocuidado.domain.model.Message
 import br.com.amparocuidado.presentation.ui.chat.components.ChatBubble
+import br.com.amparocuidado.presentation.ui.login.LoginViewModel
 import br.com.amparocuidado.presentation.ui.theme.AmparoCuidadoTheme
 import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.Camera
@@ -42,35 +48,40 @@ import com.composables.icons.lucide.SendHorizontal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    idChat: String,
+    chatScreenViewModel: ChatScreenViewModel = hiltViewModel(),
+    loginViewModel: LoginViewModel = hiltViewModel()
+) {
     var textMessage by remember { mutableStateOf("") }
 
-    val messages = remember { mutableListOf<Message>(
-        Message(
-            idMensagem = 1,
-            mensagem = "Olá, enfermeira. Estou com uma dor muito forte no meu abdômen.",
-            idChat = 22,
-            createdBy = 10,
-            createdAt = "2025-04-07",
-            nome = "Enfereiro"
-        ),
-        Message(
-            idMensagem = 2,
-            mensagem = "Olá! Sinto muito por você estar sentindo dor. Pode me dizer há quanto tempo você está assim e se a dor é constante ou vem e vai?",
-            idChat = 22,
-            createdBy = 17,
-            createdAt = "2025-04-07",
-            nome = "Alisson"
-        ),
-        Message(
-            idMensagem = 3,
-            mensagem = "Começou há umas três horas. A dor é constante e parece estar aumentando.",
-            idChat = 22,
-            createdBy = 10,
-            createdAt = "2025-04-07",
-            nome = "Enfereiro"
-        )
-    ) }
+    val messages by chatScreenViewModel.messages.collectAsState()
+
+    val user by loginViewModel.userData.collectAsState()
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(user?.id_usuario) {
+        user?.let {
+            chatScreenViewModel.getMessagesByChatId(
+                idChat = idChat.toInt(),
+                idUsuario = it.id_usuario
+            )
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.lastIndex)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        chatScreenViewModel.observeMessages()
+        onDispose {
+            chatScreenViewModel.removeMessageListener()
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -126,6 +137,7 @@ fun ChatScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                state = listState,
                 verticalArrangement = Arrangement.Bottom
             ) {
                 items(messages) { message ->
@@ -189,16 +201,5 @@ fun ChatScreen() {
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun ChatSceenPreview() {
-    AmparoCuidadoTheme(
-        darkTheme = false,
-        dynamicColor = false
-    ) {
-        ChatScreen()
     }
 }
