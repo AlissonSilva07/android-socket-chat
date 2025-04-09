@@ -32,7 +32,7 @@ fun ChatBubble(
     isLast: Boolean,
 ) {
     val shapeAuthorNotMe = if (isFirst && isLast) {
-        RoundedCornerShape(16.dp)
+        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp)
     } else if (isFirst) {
         RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp)
     } else if (isLast) {
@@ -42,13 +42,13 @@ fun ChatBubble(
     }
 
     val shapeAuthorMe = if (isFirst && isLast) {
-        RoundedCornerShape(16.dp)
+        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 4.dp, bottomStart = 16.dp)
     } else if (isFirst) {
         RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 4.dp, bottomStart = 16.dp)
     } else if (isLast) {
         RoundedCornerShape(topStart = 16.dp, topEnd = 4.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
     } else {
-        RoundedCornerShape(16.dp)
+        RoundedCornerShape(topStart = 16.dp, topEnd = 4.dp, bottomEnd = 4.dp, bottomStart = 16.dp)
     }
 
     if (message.createdBy == author) {

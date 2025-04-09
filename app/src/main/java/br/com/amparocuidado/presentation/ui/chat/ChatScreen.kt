@@ -1,6 +1,8 @@
 package br.com.amparocuidado.presentation.ui.chat
 
 import android.app.Activity
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,7 +57,9 @@ import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.Camera
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.SendHorizontal
+import java.time.Instant
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -77,7 +81,7 @@ fun ChatScreen(
         insetsController.isAppearanceLightNavigationBars = bottomBarColor.luminance() > 0.5f
     }
 
-    var textMessage by remember { mutableStateOf("") }
+    val textMessage by chatScreenViewModel.textMessage.collectAsState()
 
     val messages by chatScreenViewModel.messages.collectAsState()
 
@@ -203,7 +207,7 @@ fun ChatScreen(
                     OutlinedTextField(
                         value = textMessage,
                         onValueChange = { newValue ->
-                            textMessage = newValue                        },
+                            chatScreenViewModel.changeTextMessage(newValue)                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
                             unfocusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
@@ -221,7 +225,21 @@ fun ChatScreen(
 
                     )
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            val trimmedMessage = textMessage.trim()
+                            if (trimmedMessage.isNotEmpty()) {
+                                user?.let {
+                                    chatScreenViewModel.sendMessage(
+                                        idChat = idChat.toInt(),
+                                        userId = it.id_usuario,
+                                        message = trimmedMessage,
+                                        nome = it.nm_pessoa_fisica,
+                                        createdAt = Instant.now().toString()
+                                    )
+                                    chatScreenViewModel.changeTextMessage("")
+                                }
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = Lucide.SendHorizontal,

@@ -29,8 +29,15 @@ class ChatScreenViewModel @Inject constructor(
         MutableStateFlow<Resource<List<MessagesByChatIdResponse>>>(Resource.Idle)
     val messagesResponse = _messagesResponse.asStateFlow()
 
+    private val _textMessage = MutableStateFlow<String>("")
+    val textMessage = _textMessage.asStateFlow()
+
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages = _messages.asStateFlow()
+
+    fun changeTextMessage(text: String) {
+        _textMessage.value = text
+    }
 
     fun getMessagesByChatId(idChat: Int, idUsuario: Int) {
         viewModelScope.launch {
@@ -61,6 +68,24 @@ class ChatScreenViewModel @Inject constructor(
             put("id_usuario", userId)
         }
         socketRepository.joinChat(params)
+    }
+
+    fun sendMessage(
+        idChat: Int,
+        userId: Int,
+        message: String,
+        nome: String,
+        createdAt: String
+    ) {
+        val params = JSONObject().apply {
+            put("id_chat", idChat)
+            put("created_by", userId)
+            put("created_at", createdAt)
+            put("mensagem", message)
+            put("nome", nome)
+        }
+
+        socketRepository.sendMessage(params)
     }
 
     fun observeMessages() {
