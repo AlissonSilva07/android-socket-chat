@@ -2,6 +2,7 @@ package br.com.amparocuidado.presentation.ui.chat.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,9 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import br.com.amparocuidado.domain.model.Message
+import com.composables.icons.lucide.CheckCheck
+import com.composables.icons.lucide.Clock
+import com.composables.icons.lucide.Lucide
 
 @Composable
 fun ChatBubble(
@@ -30,6 +37,7 @@ fun ChatBubble(
     author: Int,
     isFirst: Boolean,
     isLast: Boolean,
+    isPending: Boolean
 ) {
     val shapeAuthorNotMe = if (isFirst && isLast) {
         RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp)
@@ -69,18 +77,42 @@ fun ChatBubble(
                 ),
                 shape = shapeAuthorMe,
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.Start
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
-                    Text(
-                        text = message.mensagem ?: "Mensagem",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.surface,
-                        fontWeight = FontWeight.Normal
-                    )
+                    Column(
+                        modifier = Modifier.align(Alignment.TopStart),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = message.mensagem ?: "Mensagem",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.surface,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
+
+                    if (isPending) {
+                        Icon(
+                            imageVector = Lucide.Clock,
+                            contentDescription = "Sending...",
+                            modifier = Modifier
+                                .size(16.dp)
+                                .align(Alignment.BottomEnd),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Lucide.CheckCheck,
+                            contentDescription = "Sent",
+                            modifier = Modifier
+                                .size(16.dp)
+                                .align(Alignment.BottomEnd),
+                            tint = MaterialTheme.colorScheme.scrim
+                        )
+                    }
                 }
             }
         }

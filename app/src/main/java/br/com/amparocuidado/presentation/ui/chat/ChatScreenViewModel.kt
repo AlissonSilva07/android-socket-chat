@@ -8,6 +8,7 @@ import br.com.amparocuidado.data.remote.dto.chat.MessagesByChatIdResponse
 import br.com.amparocuidado.data.utils.Resource
 import br.com.amparocuidado.domain.model.FileData
 import br.com.amparocuidado.domain.model.Message
+import br.com.amparocuidado.domain.model.MessageStatus
 import br.com.amparocuidado.domain.model.NewMessageInChat
 import br.com.amparocuidado.domain.repository.ChatRepository
 import br.com.amparocuidado.domain.repository.SocketRepository
@@ -77,6 +78,18 @@ class ChatScreenViewModel @Inject constructor(
         nome: String,
         createdAt: String
     ) {
+        val localMessage = Message(
+            id = null,
+            mensagem = message,
+            idChat = idChat,
+            nome = nome,
+            createdBy = userId,
+            createdAt = createdAt,
+            status = MessageStatus.PENDING
+        )
+
+        _messages.update { it + localMessage }
+
         val params = JSONObject().apply {
             put("id_chat", idChat)
             put("created_by", userId)
@@ -87,6 +100,7 @@ class ChatScreenViewModel @Inject constructor(
 
         socketRepository.sendMessage(params)
     }
+
 
     fun observeMessages() {
         socketRepository.onNewMessageInChat { json ->
@@ -134,15 +148,27 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     private fun insertNewMessage(message: NewMessageInChat) {
+        val newMsg = message.toMessage()
+
         _messages.update { currentList ->
-            currentList.toMutableList().apply {
-                val exists = any { it.id == message.idMensagem }
-                if (!exists) {
-                    add(message.toMessage())
-                }
+            val matchIndex = currentList.indexOfFirst {
+                it.status == MessageStatus.PENDING &&
+                        it.mensagem == newMsg.mensagem &&
+                        it.createdBy == newMsg.createdBy &&
+                        it.createdAt == newMsg.createdAt
             }
+
+            val updatedList = currentList.toMutableList()
+
+            if (matchIndex != -1) {
+                updatedList[matchIndex] = newMsg.copy(status = MessageStatus.SENT)
+            } else if (currentList.none { it.id == newMsg.id }) {
+                updatedList.add(newMsg)
+            }
+            updatedList
         }
     }
+
 
     fun removeMessageListener() {
         socketRepository.removeNewMessageInChatListener()

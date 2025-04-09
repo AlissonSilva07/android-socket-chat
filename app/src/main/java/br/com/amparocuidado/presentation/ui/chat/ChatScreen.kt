@@ -179,7 +179,8 @@ fun ChatScreen(
                         message = message,
                         author = user?.id_usuario!!,
                         isFirst = isFirst,
-                        isLast = isLast
+                        isLast = isLast,
+                        isPending = message.id == null
                     )
                     Spacer(Modifier.height(8.dp))
                 }
@@ -239,12 +240,13 @@ fun ChatScreen(
                                     chatScreenViewModel.changeTextMessage("")
                                 }
                             }
-                        }
+                        },
+                        enabled = textMessage.isNotEmpty(),
                     ) {
                         Icon(
                             imageVector = Lucide.SendHorizontal,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = if (textMessage.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.secondary
                         )
                     }
                 }

@@ -20,7 +20,8 @@ private val lightScheme = lightColorScheme(
     onSurface = textPrimary,
     outline = stroke,
     inverseOnSurface = offWhite,
-    surfaceBright = success
+    surfaceBright = success,
+    scrim = blue
 )
 
 private val darkScheme = darkColorScheme(
@@ -32,7 +33,8 @@ private val darkScheme = darkColorScheme(
     onSurface = textPrimary,
     outline = stroke,
     inverseOnSurface = offWhite,
-    surfaceBright = success
+    surfaceBright = success,
+    scrim = blue
 )
 @Immutable
 data class ColorFamily(

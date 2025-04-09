@@ -10,6 +10,7 @@ val textSecondary = Color(0xFFADB5BD)
 val stroke = Color(0xFFDEE2E6)
 val offWhite = Color(0xFFF8F9FA)
 val white = Color(0xFFFFFFFF)
+val blue = Color(0xFF4FB6EC)
 
 
 
