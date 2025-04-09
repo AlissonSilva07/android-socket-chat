@@ -68,7 +68,10 @@ fun AppNavigation(
         ) {
             val idChat = it.arguments?.getString("idChat")
             ChatScreen(
-                idChat = idChat ?: ""
+                idChat = idChat ?: "",
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }

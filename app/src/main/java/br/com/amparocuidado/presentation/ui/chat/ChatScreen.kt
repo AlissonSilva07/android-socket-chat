@@ -1,16 +1,21 @@
 package br.com.amparocuidado.presentation.ui.chat
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,9 +39,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.amparocuidado.domain.model.Message
 import br.com.amparocuidado.presentation.ui.chat.components.ChatBubble
@@ -50,9 +60,23 @@ import com.composables.icons.lucide.SendHorizontal
 @Composable
 fun ChatScreen(
     idChat: String,
+    onNavigateBack: () -> Unit,
     chatScreenViewModel: ChatScreenViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
+
+    val view = LocalView.current
+    val activity = view.context as Activity
+    val bottomBarColor = MaterialTheme.colorScheme.inverseOnSurface
+
+    SideEffect {
+        val window = activity.window
+        window.navigationBarColor = bottomBarColor.toArgb()
+
+        val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+        insetsController.isAppearanceLightNavigationBars = bottomBarColor.luminance() > 0.5f
+    }
+
     var textMessage by remember { mutableStateOf("") }
 
     val messages by chatScreenViewModel.messages.collectAsState()
@@ -91,11 +115,15 @@ fun ChatScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 navigationIcon = {
-                    Icon(
-                        imageVector = Lucide.ArrowLeft,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                    IconButton(
+                        onClick = onNavigateBack
+                    ) {
+                        Icon(
+                            imageVector = Lucide.ArrowLeft,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 },
                 title = {
                     Row(
@@ -120,39 +148,42 @@ fun ChatScreen(
                     )
                 }
             )
-        }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(
                     top = innerPadding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding(),
-                    start = 16.dp,
-                    end = 16.dp
+                    bottom = innerPadding.calculateBottomPadding()
                 )
-                .fillMaxSize()
                 .imePadding()
+                .fillMaxSize()
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
                 state = listState,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                items(messages) { message ->
+                itemsIndexed(messages) { index, message ->
+                    val isFirst = index == 0 || messages[index - 1].createdBy != message.createdBy
+                    val isLast = index == messages.lastIndex || messages[index + 1].createdBy != message.createdBy
+
                     ChatBubble(
                         message = message,
-                        author = 10
+                        author = user?.id_usuario!!,
+                        isFirst = isFirst,
+                        isLast = isLast
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(8.dp))
                 }
             }
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.inverseOnSurface,
-                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
                     modifier = Modifier
