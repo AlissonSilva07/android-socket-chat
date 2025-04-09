@@ -9,8 +9,8 @@ data class Chat(
     val nomePaciente: String,
     val quantidade: Int = 0,
     val situacaoChat: String,
-    val ultimaMensagem: String,
+    val ultimaMensagem: String?,
     val ultimoEnvio: Int,
-    val visualizada: String,
-    val nomeUltimoEnvio: String? = null
+    val visualizada: String?,
+    val nomeUltimoEnvio: String?
 )

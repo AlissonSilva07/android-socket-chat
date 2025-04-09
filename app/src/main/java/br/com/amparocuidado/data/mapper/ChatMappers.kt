@@ -7,7 +7,7 @@ fun ChatResponse.toChat(): Chat {
     return Chat(
         id = id,
         nomePaciente = nome_paciente,
-        ultimaMensagem = ultima_mensagem,
+        ultimaMensagem = ultima_mensagem ?: "Sem mensagens.",
         ultimoEnvio = ultimo_envio,
         createdAt = created_at,
         visualizada = visualizada,
@@ -15,6 +15,7 @@ fun ChatResponse.toChat(): Chat {
         nomeEnfermeiro = nome_enfermeiro,
         situacaoChat = situacao_chat,
         idBoletim = id_boletim,
-        idEnfermeiro = id_enfermeiro
+        idEnfermeiro = id_enfermeiro,
+        nomeUltimoEnvio = null
     )
 }

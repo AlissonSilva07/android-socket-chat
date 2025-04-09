@@ -2,6 +2,7 @@ package br.com.amparocuidado.presentation.ui.chatlist
 
 import ISOToDateAdapter
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,11 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.com.amparocuidado.domain.model.Chat
 import br.com.amparocuidado.presentation.components.ButtonVariant
 import br.com.amparocuidado.presentation.components.CustomButton
 import br.com.amparocuidado.presentation.ui.chatlist.components.ChatListCard
@@ -38,14 +41,16 @@ fun ChatsScreen(
     chatViewModel: ChatListViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
-    val user = loginViewModel.userData.collectAsState()
-    val chatList = chatViewModel.chatList.collectAsState()
+    val user by loginViewModel.userData.collectAsState()
 
-    LaunchedEffect(user.value?.id_usuario) {
-        user.value?.let {
+    LaunchedEffect(user?.id_usuario) {
+        user?.let {
             chatViewModel.getChatsByPaciente(id = it.id_usuario)
         }
     }
+
+    val chatList by chatViewModel.chatList.collectAsState()
+
 
     DisposableEffect(Unit) {
         chatViewModel.observeMessages()
@@ -69,7 +74,7 @@ fun ChatsScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Chats de ${user.value?.nm_pessoa_fisica}",
+                            text = "Chats de ${user?.nm_pessoa_fisica}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold
@@ -103,20 +108,20 @@ fun ChatsScreen(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
-            if (chatList.value != null) {
+            if (chatList != null) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(chatList.value ?: emptyList()) { chat ->
+                    items(chatList as List<Chat>) { chat ->
                         ChatListCard(
                             onNavigateToChat = onNavigateToChat,
                             modifier = Modifier.fillMaxWidth(),
                             title = chat.nomeEnfermeiro,
                             date = ISOToDateAdapter(chat.createdAt),
-                            lastMessage = chat.ultimaMensagem,
+                            lastMessage = chat.ultimaMensagem ?: "Sem mensagens.",
                             quantity = chat.quantidade
                         )
                     }
@@ -128,7 +133,6 @@ fun ChatsScreen(
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-
         }
     }
 }

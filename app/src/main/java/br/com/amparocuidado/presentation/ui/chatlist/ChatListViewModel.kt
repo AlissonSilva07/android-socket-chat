@@ -1,5 +1,6 @@
 package br.com.amparocuidado.presentation.ui.chatlist
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.amparocuidado.data.mapper.toChat
@@ -41,8 +42,14 @@ class ChatListViewModel @Inject constructor(
                     size = 5
                 )
                 if (response is Resource.Success) {
-                    _chatList.value = response.data.data.map { it.toChat() }
-                    joinAllChats(_chatList.value ?: emptyList(), id)
+                    try {
+                        val chats = response.data.data.map { it.toChat() }
+                        _chatList.value = chats
+                        joinAllChats(chats, id)
+                        Log.d("ChatListViewModel", "List: ${_chatList.value}")
+                    } catch (e: Exception) {
+                        Log.e("ChatListViewModel", "Error mapping chats: ${e.message}", e)
+                    }
                 } else {
                     _chatList.value = null
                 }
