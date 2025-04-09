@@ -10,5 +10,6 @@ interface SocketRepository {
     fun removeNewMessageListener()
     fun onNewMessageInChat(callback: (JSONObject) -> Unit)
     fun removeNewMessageInChatListener()
+    fun isTyping(params: JSONObject)
     fun leaveChat(params: JSONObject)
 }

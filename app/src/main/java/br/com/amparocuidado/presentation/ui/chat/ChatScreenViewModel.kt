@@ -15,6 +15,8 @@ import br.com.amparocuidado.domain.repository.SocketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -38,6 +40,27 @@ class ChatScreenViewModel @Inject constructor(
 
     fun changeTextMessage(text: String) {
         _textMessage.value = text
+    }
+
+    private var currentChatId: Int? = null
+
+    fun setChatId(chatId: String) {
+        currentChatId = chatId.toInt()
+    }
+
+    init {
+        viewModelScope.launch {
+            _textMessage
+                .debounce(200) // waits 200ms after last input
+                .collectLatest { text ->
+                    val isTyping = text.isNotEmpty()
+                    val params = JSONObject().apply {
+                        put("id_chat", currentChatId)
+                        put("isTyping", isTyping)
+                    }
+                    socketRepository.isTyping(params)
+                }
+        }
     }
 
     fun getMessagesByChatId(idChat: Int, idUsuario: Int) {

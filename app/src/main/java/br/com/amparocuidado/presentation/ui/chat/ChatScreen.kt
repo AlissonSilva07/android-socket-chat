@@ -81,6 +81,10 @@ fun ChatScreen(
         insetsController.isAppearanceLightNavigationBars = bottomBarColor.luminance() > 0.5f
     }
 
+    LaunchedEffect(idChat) {
+        chatScreenViewModel.setChatId(idChat)
+    }
+
     val textMessage by chatScreenViewModel.textMessage.collectAsState()
 
     val messages by chatScreenViewModel.messages.collectAsState()

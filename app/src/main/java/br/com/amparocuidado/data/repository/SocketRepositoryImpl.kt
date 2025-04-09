@@ -44,6 +44,10 @@ class SocketRepositoryImpl @Inject constructor(
         socketManager.getSocket().off("message_sent")
     }
 
+    override fun isTyping(params: JSONObject) {
+        socketManager.getSocket().emit("is_typing", params)
+    }
+
     override fun leaveChat(params: JSONObject) {
         socketManager.getSocket().emit("leave_chat", params)
     }
