@@ -16,7 +16,7 @@ fun MessagesByChatIdResponse.toMessage(): Message {
         createdAt = created_at,
         updatedAt = updated_at,
         deletedAt = deleted_at,
-        image = image,
+        image = image as ByteArray?,
         mimetype = mimetype,
         originalname = originalname,
         arquivo = arquivo,

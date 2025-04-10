@@ -1,6 +1,9 @@
 package br.com.amparocuidado.presentation.ui.chat.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +27,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.amparocuidado.domain.model.Message
+import br.com.amparocuidado.domain.model.MessageStatus
+import br.com.amparocuidado.presentation.ui.theme.AmparoCuidadoTheme
+import br.com.amparocuidado.presentation.utils.ISOToTimeAdapter
+import br.com.amparocuidado.presentation.utils.toImageBitmap
 import com.composables.icons.lucide.CheckCheck
 import com.composables.icons.lucide.Clock
 import com.composables.icons.lucide.Lucide
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatBubble(
     modifier: Modifier = Modifier,
@@ -62,13 +71,10 @@ fun ChatBubble(
     if (message.createdBy == author) {
         Row(
             modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.Bottom
+            horizontalArrangement = Arrangement.End,
         ) {
-            Spacer(Modifier.weight(0.09f))
+            Spacer(modifier = Modifier.width(40.dp))
             Card(
-                modifier = Modifier
-                    .weight(1f),
                 colors = CardColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onSurface,
@@ -79,47 +85,72 @@ fun ChatBubble(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.BottomEnd,
                 ) {
                     Column(
-                        modifier = Modifier.align(Alignment.TopStart),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(bottom = 16.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Text(
-                            text = message.mensagem ?: "Mensagem",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.surface,
-                            fontWeight = FontWeight.Normal
-                        )
+                        message.mensagem?.let {
+                            Text(
+                                text = message.mensagem ?: "Mensagem",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.surface,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+
+                        message.image?.toImageBitmap()?.let { bitmap ->
+                            Spacer(modifier = Modifier.padding(top = 8.dp))
+                            Image(
+                                bitmap = bitmap,
+                                contentDescription = "Image",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp)
+                            )
+                        }
                     }
 
-                    if (isPending) {
-                        Icon(
-                            imageVector = Lucide.Clock,
-                            contentDescription = "Sending...",
-                            modifier = Modifier
-                                .size(16.dp)
-                                .align(Alignment.BottomEnd),
-                            tint = MaterialTheme.colorScheme.secondary
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = ISOToTimeAdapter(message.createdAt ?: "--:--"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            fontWeight = FontWeight.Normal
                         )
-                    } else {
-                        Icon(
-                            imageVector = Lucide.CheckCheck,
-                            contentDescription = "Sent",
-                            modifier = Modifier
-                                .size(16.dp)
-                                .align(Alignment.BottomEnd),
-                            tint = MaterialTheme.colorScheme.scrim
-                        )
+                        if (isPending) {
+                            Icon(
+                                imageVector = Lucide.Clock,
+                                contentDescription = "Sending...",
+                                modifier = Modifier
+                                    .size(16.dp),
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Lucide.CheckCheck,
+                                contentDescription = "Sent",
+                                modifier = Modifier
+                                    .size(16.dp),
+                                tint = MaterialTheme.colorScheme.scrim
+                            )
+                        }
                     }
                 }
             }
         }
     } else {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.Bottom
         ) {
             if (isLast) {
@@ -150,9 +181,8 @@ fun ChatBubble(
             } else {
                 Spacer(modifier = Modifier.width(32.dp))
             }
+            Spacer(modifier = Modifier.width(8.dp))
             Card(
-                modifier = Modifier
-                    .fillMaxWidth(),
                 colors = CardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
@@ -162,20 +192,84 @@ fun ChatBubble(
                 shape = shapeAuthorNotMe,
                 border = BorderStroke(color = MaterialTheme.colorScheme.outline, width = 1.dp)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.Start
+                        .padding(8.dp),
+                    contentAlignment = Alignment.BottomStart,
                 ) {
-                    Text(
-                        text = message.mensagem ?: "Mensagem",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Normal
-                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(bottom = 16.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = message.mensagem ?: "Mensagem",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = ISOToTimeAdapter(message.createdAt ?: "--:--"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview
+@Composable
+private fun ChatBubblePrev() {
+    AmparoCuidadoTheme(
+        dynamicColor = false
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            ChatBubble(
+                message = Message(
+                    id = 1,
+                    mensagem = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+                    idChat = 1,
+                    nome = "João",
+                    createdBy = 1,
+                    createdAt = "2025-04-10T14:35:00Z"
+                ),
+                modifier = Modifier,
+                author = 1,
+                isFirst = true,
+                isLast = false,
+                isPending = false
+            )
+            ChatBubble(
+                message = Message(
+                    id = 2,
+                    mensagem = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+                    idChat = 1,
+                    nome = "João",
+                    createdBy = 2,
+                    createdAt = "2025-04-10T14:38:00Z"
+                ),
+                modifier = Modifier,
+                author = 1,
+                isFirst = true,
+                isLast = true,
+                isPending = false
+            )
+        }
+    }
+
 }

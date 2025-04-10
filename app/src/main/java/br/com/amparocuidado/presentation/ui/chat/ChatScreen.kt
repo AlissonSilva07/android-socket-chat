@@ -7,20 +7,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,23 +32,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import br.com.amparocuidado.domain.model.Message
 import br.com.amparocuidado.presentation.ui.chat.components.ChatBubble
 import br.com.amparocuidado.presentation.ui.login.LoginViewModel
-import br.com.amparocuidado.presentation.ui.theme.AmparoCuidadoTheme
+import br.com.amparocuidado.presentation.utils.ISOToDateDivider
 import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.Camera
 import com.composables.icons.lucide.Lucide
@@ -68,8 +59,8 @@ fun ChatScreen(
     chatScreenViewModel: ChatScreenViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
-
     val view = LocalView.current
+
     val activity = view.context as Activity
     val bottomBarColor = MaterialTheme.colorScheme.inverseOnSurface
 
@@ -121,7 +112,7 @@ fun ChatScreen(
             TopAppBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 8.dp),
                 navigationIcon = {
                     IconButton(
                         onClick = onNavigateBack
@@ -176,6 +167,40 @@ fun ChatScreen(
                 verticalArrangement = Arrangement.Bottom
             ) {
                 itemsIndexed(messages) { index, message ->
+                    val currentDate = message.createdAt?.let { ISOToDateDivider(it) } ?: ""
+                    val previousDate = if (index > 0) messages[index - 1].createdAt?.let { ISOToDateDivider(it) } else null
+
+                    if (currentDate != previousDate) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 8.dp),
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                            Text(
+                                text = currentDate,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.outline,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 8.dp),
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+
                     val isFirst = index == 0 || messages[index - 1].createdBy != message.createdBy
                     val isLast = index == messages.lastIndex || messages[index + 1].createdBy != message.createdBy
 

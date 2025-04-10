@@ -13,6 +13,7 @@ import br.com.amparocuidado.domain.model.NewMessageInChat
 import br.com.amparocuidado.domain.repository.ChatRepository
 import br.com.amparocuidado.domain.repository.SocketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -20,8 +21,10 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.net.URLEncoder
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class ChatScreenViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
@@ -51,7 +54,7 @@ class ChatScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _textMessage
-                .debounce(200) // waits 200ms after last input
+                .debounce(200)
                 .collectLatest { text ->
                     val isTyping = text.isNotEmpty()
                     val params = JSONObject().apply {
@@ -72,6 +75,7 @@ class ChatScreenViewModel @Inject constructor(
                     try {
                         val messages = response.data.map { it.toMessage() }
                         _messages.value = messages
+                        loadImages(messages)
                         joinChat(idChat, idUsuario)
                     } catch (e: Exception) {
                         Log.e("ChatListViewModel", "Error mapping chats: ${e.message}", e)
@@ -82,6 +86,28 @@ class ChatScreenViewModel @Inject constructor(
                 _messagesResponse.value = response
             } catch (e: Exception) {
                 _messagesResponse.value = Resource.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    private fun loadImages(messages: List<Message>) {
+        viewModelScope.launch {
+            val updatedMessages = messages.map { message ->
+                val fileName = URLEncoder.encode(message.arquivo) ?: return@map message
+                Log.d("ChatViewModel", "Loading image for message: $fileName")
+                val result = chatRepository.getChatImagesByUrl(fileName)
+                if (result is Resource.Success) {
+                    message.copy(image = result.data)
+                } else {
+                    Log.e("ChatViewModel", "Failed to load image")
+                    message
+                }
+            }
+
+            _messages.update {
+                it.map { currentMsg ->
+                    updatedMessages.find { it.id == currentMsg.id } ?: currentMsg
+                }
             }
         }
     }

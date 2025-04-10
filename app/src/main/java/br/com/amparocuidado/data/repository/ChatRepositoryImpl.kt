@@ -6,6 +6,8 @@ import br.com.amparocuidado.data.remote.dto.chat.GetChatsByPacienteResponseDto
 import br.com.amparocuidado.data.remote.dto.chat.MessagesByChatIdResponse
 import br.com.amparocuidado.data.utils.Resource
 import br.com.amparocuidado.domain.repository.ChatRepository
+import java.io.BufferedInputStream
+import java.io.InputStream
 import javax.inject.Inject
 
 class ChatRepositoryImpl @Inject constructor(
@@ -57,5 +59,22 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
-
+    override suspend fun getChatImagesByUrl(fileName: String): Resource<ByteArray> {
+        return try {
+            val response = chatApi.getChatImagesByUrl(fileName)
+            if (response.isSuccessful) {
+                val bytes = response.body()?.bytes()
+                if (bytes != null) {
+                    Resource.Success(bytes)
+                } else {
+                    Resource.Error("Empty image data")
+                }
+            } else {
+                val error = response.errorBody()?.string() ?: "Unknown error"
+                Resource.Error(error)
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "An error occurred")
+        }
+    }
 }

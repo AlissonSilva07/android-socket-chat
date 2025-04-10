@@ -14,7 +14,7 @@ data class Message(
     val createdAt: String? = null,
     val updatedAt: String? = null,
     val deletedAt: String? = null,
-    val image: String? = null,
+    val image: ByteArray? = null,
     val mimetype: String? = null,
     val originalname: String? = null,
     val arquivo: String? = null,
