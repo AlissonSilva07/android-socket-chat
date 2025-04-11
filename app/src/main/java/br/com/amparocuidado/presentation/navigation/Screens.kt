@@ -11,4 +11,5 @@ sealed class Screen(val route: String) {
             return "chats/$idChat"
         }
     }
+    data object Camera : Screen("camera")
 }

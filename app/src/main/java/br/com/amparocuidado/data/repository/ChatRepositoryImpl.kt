@@ -6,6 +6,8 @@ import br.com.amparocuidado.data.remote.dto.chat.GetChatsByPacienteResponseDto
 import br.com.amparocuidado.data.remote.dto.chat.MessagesByChatIdResponse
 import br.com.amparocuidado.data.utils.Resource
 import br.com.amparocuidado.domain.repository.ChatRepository
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import java.io.BufferedInputStream
 import java.io.InputStream
 import javax.inject.Inject
@@ -69,6 +71,24 @@ class ChatRepositoryImpl @Inject constructor(
                 } else {
                     Resource.Error("Empty image data")
                 }
+            } else {
+                val error = response.errorBody()?.string() ?: "Unknown error"
+                Resource.Error(error)
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "An error occurred")
+        }
+    }
+
+    override suspend fun postChatImages(form: Triple<MultipartBody.Part, RequestBody, RequestBody>): Resource<Unit> {
+        return try {
+            val response = chatApi.postChatImage(
+                file = form.first,
+                mensagem = form.second,
+                nome = form.third
+            )
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
             } else {
                 val error = response.errorBody()?.string() ?: "Unknown error"
                 Resource.Error(error)

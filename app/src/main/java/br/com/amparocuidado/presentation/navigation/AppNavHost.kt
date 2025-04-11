@@ -1,10 +1,8 @@
 package br.com.amparocuidado.presentation.navigation
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -12,8 +10,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import br.com.amparocuidado.presentation.ui.camera.CameraScreen
 import br.com.amparocuidado.presentation.ui.chat.ChatScreen
-import br.com.amparocuidado.presentation.ui.chatlist.ChatsScreen
+import br.com.amparocuidado.presentation.ui.chat.ChatScreenViewModel
+import br.com.amparocuidado.presentation.ui.chatlist.ChatListScreen
 import br.com.amparocuidado.presentation.ui.login.LoginScreen
 import br.com.amparocuidado.presentation.ui.login.LoginViewModel
 import br.com.amparocuidado.presentation.ui.welcome.WelcomeScreen
@@ -22,6 +22,7 @@ import br.com.amparocuidado.presentation.ui.welcome.WelcomeScreen
 @Composable
 fun AppNavigation(
     loginViewModel: LoginViewModel = hiltViewModel(),
+    chatViewModel: ChatScreenViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
     val authToken = loginViewModel.authToken.collectAsState()
@@ -55,7 +56,7 @@ fun AppNavigation(
         }
 
         composable(Screen.ChatRoutes.Chats) {
-            ChatsScreen(
+            ChatListScreen(
                 onNavigateToChat = { idChat ->
                     navController.navigate(Screen.ChatRoutes.getChatDetailRoute(idChat))
                 }
@@ -69,6 +70,19 @@ fun AppNavigation(
             val idChat = it.arguments?.getString("idChat")
             ChatScreen(
                 idChat = idChat ?: "",
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                navController = navController,
+            )
+        }
+
+        composable(Screen.Camera.route) {
+            CameraScreen(
+                onPhotoCaptured = { uri ->
+                    chatViewModel.onImageCaptured(uri)
+                    navController.popBackStack()
+                },
                 onNavigateBack = {
                     navController.popBackStack()
                 }

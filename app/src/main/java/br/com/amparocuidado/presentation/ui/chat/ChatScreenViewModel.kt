@@ -1,6 +1,10 @@
 package br.com.amparocuidado.presentation.ui.chat
 
+import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.amparocuidado.data.mapper.toMessage
@@ -20,8 +24,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import java.net.URLEncoder
+import java.io.File
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
@@ -49,6 +58,13 @@ class ChatScreenViewModel @Inject constructor(
 
     fun setChatId(chatId: String) {
         currentChatId = chatId.toInt()
+    }
+
+    var capturedImageUri by mutableStateOf<Uri?>(null)
+        private set
+
+    fun onImageCaptured(uri: Uri) {
+        capturedImageUri = uri
     }
 
     init {
@@ -93,7 +109,7 @@ class ChatScreenViewModel @Inject constructor(
     private fun loadImages(messages: List<Message>) {
         viewModelScope.launch {
             val updatedMessages = messages.map { message ->
-                val fileName = URLEncoder.encode(message.arquivo) ?: return@map message
+                val fileName = message.arquivo ?: return@map message
                 Log.d("ChatViewModel", "Loading image for message: $fileName")
                 val result = chatRepository.getChatImagesByUrl(fileName)
                 if (result is Resource.Success) {
@@ -150,12 +166,62 @@ class ChatScreenViewModel @Inject constructor(
         socketRepository.sendMessage(params)
     }
 
+    fun postChatImage(
+        file: File,
+        idChat: Int,
+        nome: String
+    ) {
+        viewModelScope.launch {
+            _messagesResponse.value = Resource.Loading
+
+            val form = createMultipartBody(file, idChat.toString(), nome)
+
+            try {
+                val response = chatRepository.postChatImages(form)
+                if (response is Resource.Success) {
+                    return@launch
+                } else {
+                    return@launch
+                }
+            } catch (e: Exception) {
+                _messagesResponse.value = Resource.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    private fun createMultipartBody(
+        file: File,
+        idChat: String,
+        nome: String
+    ): Triple<MultipartBody.Part, RequestBody, RequestBody> {
+        val requestFile = file
+            .asRequestBody("image/*".toMediaTypeOrNull())
+
+        val filePart = MultipartBody.Part.createFormData(
+            name = "arquivo",
+            filename = file.name,
+            body = requestFile
+        )
+
+        val mensagem = idChat
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val nome = nome
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+
+        return Triple(filePart, mensagem, nome)
+    }
+
 
     fun observeMessages() {
         socketRepository.onNewMessageInChat { json ->
             try {
                 val idMensagem = json.getInt("id_mensagem")
-                val mensagem = json.getString("mensagem")
+                val mensagem = if (json.has("mensagem") && !json.isNull("mensagem")) {
+                    json.getString("mensagem")
+                } else {
+                    null
+                }
                 val idChat = json.getInt("id_chat")
                 val createdBy = json.getInt("created_by")
                 val createdAt = json.getString("created_at")
@@ -204,7 +270,8 @@ class ChatScreenViewModel @Inject constructor(
                 it.status == MessageStatus.PENDING &&
                         it.mensagem == newMsg.mensagem &&
                         it.createdBy == newMsg.createdBy &&
-                        it.createdAt == newMsg.createdAt
+                        it.createdAt == newMsg.createdAt &&
+                        it.image == newMsg.image
             }
 
             val updatedList = currentList.toMutableList()
@@ -214,6 +281,7 @@ class ChatScreenViewModel @Inject constructor(
             } else if (currentList.none { it.id == newMsg.id }) {
                 updatedList.add(newMsg)
             }
+            loadImages(updatedList)
             updatedList
         }
     }

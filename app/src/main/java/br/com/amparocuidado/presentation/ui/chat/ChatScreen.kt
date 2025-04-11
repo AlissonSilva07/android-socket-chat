@@ -2,6 +2,7 @@ package br.com.amparocuidado.presentation.ui.chat
 
 import android.app.Activity
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,11 +38,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import br.com.amparocuidado.data.utils.Resource
+import br.com.amparocuidado.presentation.navigation.Screen
 import br.com.amparocuidado.presentation.ui.chat.components.ChatBubble
 import br.com.amparocuidado.presentation.ui.login.LoginViewModel
 import br.com.amparocuidado.presentation.utils.ISOToDateDivider
@@ -56,10 +62,12 @@ import java.time.Instant
 fun ChatScreen(
     idChat: String,
     onNavigateBack: () -> Unit,
+    navController: NavController,
     chatScreenViewModel: ChatScreenViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
     val view = LocalView.current
+    val context = LocalContext.current
 
     val activity = view.context as Activity
     val bottomBarColor = MaterialTheme.colorScheme.inverseOnSurface
@@ -78,6 +86,7 @@ fun ChatScreen(
 
     val textMessage by chatScreenViewModel.textMessage.collectAsState()
 
+    val messagesResponse by chatScreenViewModel.messagesResponse.collectAsState()
     val messages by chatScreenViewModel.messages.collectAsState()
 
     val user by loginViewModel.userData.collectAsState()
@@ -164,54 +173,130 @@ fun ChatScreen(
                     .weight(1f)
                     .padding(horizontal = 16.dp),
                 state = listState,
-                verticalArrangement = Arrangement.Bottom
+                verticalArrangement = Arrangement.Center
             ) {
-                itemsIndexed(messages) { index, message ->
-                    val currentDate = message.createdAt?.let { ISOToDateDivider(it) } ?: ""
-                    val previousDate = if (index > 0) messages[index - 1].createdAt?.let { ISOToDateDivider(it) } else null
-
-                    if (currentDate != previousDate) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            HorizontalDivider(
+                when (messagesResponse) {
+                    is Resource.Loading -> {
+                        item {
+                            Column(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .padding(end = 8.dp),
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                            )
-                            Text(
-                                text = currentDate,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.outline,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 8.dp),
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Carregando mensagens",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
                         }
                     }
 
-                    val isFirst = index == 0 || messages[index - 1].createdBy != message.createdBy
-                    val isLast = index == messages.lastIndex || messages[index + 1].createdBy != message.createdBy
+                    is Resource.Success<*> -> {
+                        if (messages != null) {
+                            itemsIndexed(messages) { index, message ->
+                                val currentDate =
+                                    message.createdAt?.let { ISOToDateDivider(it) } ?: ""
+                                val previousDate =
+                                    if (index > 0) messages[index - 1].createdAt?.let {
+                                        ISOToDateDivider(it)
+                                    } else null
 
-                    ChatBubble(
-                        message = message,
-                        author = user?.id_usuario!!,
-                        isFirst = isFirst,
-                        isLast = isLast,
-                        isPending = message.id == null
-                    )
-                    Spacer(Modifier.height(8.dp))
+                                if (currentDate != previousDate) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        HorizontalDivider(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 8.dp),
+                                            thickness = 1.dp,
+                                            color = MaterialTheme.colorScheme.outline,
+                                        )
+                                        Text(
+                                            text = currentDate,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.outline,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        HorizontalDivider(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(start = 8.dp),
+                                            thickness = 1.dp,
+                                            color = MaterialTheme.colorScheme.outline
+                                        )
+                                    }
+                                }
+
+                                val isFirst =
+                                    index == 0 || messages[index - 1].createdBy != message.createdBy
+                                val isLast =
+                                    index == messages.lastIndex || messages[index + 1].createdBy != message.createdBy
+
+                                ChatBubble(
+                                    message = message,
+                                    author = user?.id_usuario!!,
+                                    isFirst = isFirst,
+                                    isLast = isLast,
+                                    isPending = message.id == null
+                                )
+                                Spacer(Modifier.height(8.dp))
+                            }
+                        } else {
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "Nenhuma conversa encontrada.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        Toast.makeText(
+                            context,
+                            "Erro ao carregar as mensagens",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Erro ao carregar histórico de conversas.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
+                    }
+
+                    else -> {}
                 }
             }
             Surface(
@@ -226,7 +311,9 @@ fun ChatScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            navController.navigate(Screen.Camera.route)
+                        }
                     ) {
                         Icon(
                             imageVector = Lucide.Camera,
@@ -237,7 +324,8 @@ fun ChatScreen(
                     OutlinedTextField(
                         value = textMessage,
                         onValueChange = { newValue ->
-                            chatScreenViewModel.changeTextMessage(newValue)                        },
+                            chatScreenViewModel.changeTextMessage(newValue)
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
                             unfocusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
@@ -253,7 +341,7 @@ fun ChatScreen(
                         },
                         modifier = Modifier.weight(1f),
 
-                    )
+                        )
                     IconButton(
                         onClick = {
                             val trimmedMessage = textMessage.trim()

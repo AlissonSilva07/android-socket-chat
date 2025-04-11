@@ -102,7 +102,7 @@ class ChatListViewModel @Inject constructor(
                 val index = indexOfFirst { it.id == message.id_chat }
                 if (index != -1) {
                     val updatedChat = this[index].copy(
-                        ultimaMensagem = message.mensagem,
+                        ultimaMensagem = if (message == null) "Arquivo" else  message.mensagem,
                         createdAt = message.created_at,
                         quantidade = message.quantidade
                     )

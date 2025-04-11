@@ -2,7 +2,7 @@ package br.com.amparocuidado.domain.model
 
 data class NewMessageInChat(
     val idMensagem: Int,
-    val mensagem: String,
+    val mensagem: String?,
     val idChat: Int,
     val createdBy: Int,
     val createdAt: String,
