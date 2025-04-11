@@ -31,6 +31,14 @@ class ChatListViewModel @Inject constructor(
     private val _chatList = MutableStateFlow<List<Chat>?>(null)
     val chatList = _chatList.asStateFlow()
 
+    fun getCachedChats() {
+        viewModelScope.launch {
+            chatRepository.getCachedChats().collect { chats ->
+                _chatList.value = chats
+            }
+        }
+    }
+
     fun getChatsByPaciente(id: Int) {
         viewModelScope.launch {
             _chatResponse.value = Resource.Loading
@@ -51,7 +59,7 @@ class ChatListViewModel @Inject constructor(
                         Log.e("ChatListViewModel", "Error mapping chats: ${e.message}", e)
                     }
                 } else {
-                    _chatList.value = null
+                    getCachedChats()
                 }
                 _chatResponse.value = response
             } catch (e: Exception) {

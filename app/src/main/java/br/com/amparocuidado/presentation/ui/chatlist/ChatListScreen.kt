@@ -120,11 +120,7 @@ fun ChatListScreen(
                         "Erro ao carregar histórico de conversas.",
                         Toast.LENGTH_SHORT
                     ).show()
-                    Text(
-                        text = "Erro ao carregar histórico de conversas.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+                    chatViewModel.getCachedChats()
                 }
                 Resource.Loading -> {
                     Column(

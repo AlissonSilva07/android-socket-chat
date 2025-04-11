@@ -1,19 +1,24 @@
 package br.com.amparocuidado.data.repository
 
 import android.util.Log
+import br.com.amparocuidado.data.local.chats.ChatDao
+import br.com.amparocuidado.data.mapper.toChat
+import br.com.amparocuidado.data.mapper.toEntity
 import br.com.amparocuidado.data.remote.api.ChatApi
 import br.com.amparocuidado.data.remote.dto.chat.GetChatsByPacienteResponseDto
 import br.com.amparocuidado.data.remote.dto.chat.MessagesByChatIdResponse
 import br.com.amparocuidado.data.utils.Resource
+import br.com.amparocuidado.domain.model.Chat
 import br.com.amparocuidado.domain.repository.ChatRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import java.io.BufferedInputStream
-import java.io.InputStream
 import javax.inject.Inject
 
 class ChatRepositoryImpl @Inject constructor(
-    private val chatApi: ChatApi
+    private val chatApi: ChatApi,
+    private val chatDao: ChatDao
 ): ChatRepository {
     override suspend fun getChatsByPaciente(
         idUsuario: Int,
@@ -30,16 +35,27 @@ class ChatRepositoryImpl @Inject constructor(
             )
             if (response.isSuccessful && response.body() != null) {
                 val data = response.body()!!
+
+                val chats = data.data.map { it.toEntity() }
+
+                chatDao.clearChats()
+                chatDao.insertAll(chats)
+
                 Resource.Success(data)
             } else if (response.errorBody() != null) {
                 val errorMessage = response.errorBody()!!.charStream().readText()
-                Log.e("API_RESPONSE", errorMessage)
                 Resource.Error(errorMessage)
             } else {
                 Resource.Error("An unknown error occurred")
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
+    override suspend fun getCachedChats(): Flow<List<Chat>> {
+        return chatDao.getChats().map { chat ->
+            chat.map { it.toChat() }
         }
     }
 

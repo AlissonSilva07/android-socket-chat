@@ -1,5 +1,6 @@
 package br.com.amparocuidado.di
 
+import br.com.amparocuidado.data.local.chats.ChatDao
 import br.com.amparocuidado.data.remote.api.AuthApi
 import br.com.amparocuidado.data.remote.api.ChatApi
 import br.com.amparocuidado.data.remote.api.UserApi
@@ -41,8 +42,9 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideChatRepository(
-        chatApi: ChatApi
-    ): ChatRepository = ChatRepositoryImpl(chatApi)
+        chatApi: ChatApi,
+        chatDao: ChatDao
+    ): ChatRepository = ChatRepositoryImpl(chatApi, chatDao)
 
     @Provides
     @Singleton

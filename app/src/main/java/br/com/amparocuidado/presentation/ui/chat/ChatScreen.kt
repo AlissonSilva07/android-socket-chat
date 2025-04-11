@@ -173,7 +173,7 @@ fun ChatScreen(
                     .weight(1f)
                     .padding(horizontal = 16.dp),
                 state = listState,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Bottom
             ) {
                 when (messagesResponse) {
                     is Resource.Loading -> {

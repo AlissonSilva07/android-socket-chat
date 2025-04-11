@@ -58,6 +58,10 @@ dependencies {
     implementation(libs.socket.io) {
         exclude(group = "org.json", module = "json")
     }
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    ksp(libs.room.compiler)
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)
     implementation(libs.camerax.lifecycle)
